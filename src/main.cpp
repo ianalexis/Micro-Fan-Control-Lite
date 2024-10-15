@@ -25,25 +25,31 @@ static int lecturaTermistor = 0; // Lectura del termistor.
 struct TempPWM {
     int temperatura;
     int porcentajePWM;
-};
+    };
 
-// Tabla del usuario
-static TempPWM tableUserTempSpeed[] = {
+// Tabla de conversion de temperatura a PWM
+static const TempPWM tableDefaultTempSpeed[] = {
+    {0, 0},
     {40, 25},
     {60, 50},
     {70, 70},
-    {80, 100}};
+    {80, 100}
+    };
 
-// Tabla de conversion de temperatura a PWM
-static TempPWM tableTempSpeed[] = {
+// Tabla del usuario
+static TempPWM tableUserTempSpeed[] = {
     {0, 0},
-    {40, pwmMin},
+    {40, 25},
     {60, 50},
     {70, 70},
-    {80, pwmMax}};
+    {80, 100}
+    };
+
+// Puntero a la tabla de conversion de temperatura a PWM
+static TempPWM* tableTempSpeed = nullptr;
 
 // Número de elementos en la matriz
-static int cantElementosArray = sizeof(tableTempSpeed) / sizeof(tableTempSpeed[0]);
+static int cantElementosArray = 0;
 
 // Declaraciones de funciones
 int temperaturaTermistor();
@@ -76,44 +82,46 @@ void loop() {
 void actualizarTabla() {
     Serial.println("Actualizando tabla de conversion...");
     // Limpiar la tabla de conversion de temperatura a PWM
-    memset(tableTempSpeed, 0, sizeof(tableTempSpeed));
-
+    if (tableTempSpeed != nullptr) {
+        free(tableTempSpeed);
+    }
+    int cantElementosUserArray = sizeof(tableUserTempSpeed) / sizeof(tableUserTempSpeed[0]);
+    cantElementosArray = cantElementosUserArray + 2; // +2 para el valor inicial {0, 0} y el valor final {pwmMax}
+    tableTempSpeed = (TempPWM*)malloc(cantElementosArray * sizeof(TempPWM));
+    if (tableTempSpeed == nullptr) {
+        Serial.println("Error: No se pudo asignar memoria para la tabla de conversion.");
+        return;
+    }
     // Colocar el primer valor 0,0
     tableTempSpeed[0].temperatura = 0;
     tableTempSpeed[0].porcentajePWM = 0;
-
-    int cantElementosUserArray = sizeof(tableUserTempSpeed) / sizeof(tableUserTempSpeed[0]);
-    int tamanoTableTempSpeed = sizeof(tableTempSpeed) / sizeof(tableTempSpeed[0]);
-
     // Copiar los valores del usuario a la tabla de conversion
     for (int i = 0; i < cantElementosUserArray; i++) {
         tableTempSpeed[i + 1].temperatura = tableUserTempSpeed[i].temperatura;
         tableTempSpeed[i + 1].porcentajePWM = tableUserTempSpeed[i].porcentajePWM;
     }
-
-    // Valida valores ascendentes y entre pwmMin y pwmMax
-    for (int i = 1; i < cantElementosUserArray; i++) {
+    // Valida valores entre pwmMin y pwmMax y que la temperatura y velocidad esten en orden ascendente
+    for (int i = 1; i <= cantElementosUserArray; i++) {
         if (tableTempSpeed[i].porcentajePWM < pwmMin) {
             tableTempSpeed[i].porcentajePWM = pwmMin;
         } else if (tableTempSpeed[i].porcentajePWM > pwmMax) {
             tableTempSpeed[i].porcentajePWM = pwmMax;
         }
-        if (tableTempSpeed[i].temperatura > tableTempSpeed[i + 1].temperatura) { // Si la temperatura es mayor a la siguiente, se reemplaza el valor por un promedio entre el siguiente y el anterior.
+        if (i < cantElementosUserArray && tableTempSpeed[i].temperatura > tableTempSpeed[i + 1].temperatura) { // Si la temperatura es mayor a la siguiente, se reemplaza el valor por un promedio entre el siguiente y el anterior.
             tableTempSpeed[i].temperatura = (tableTempSpeed[i + 1].temperatura + tableTempSpeed[i - 1].temperatura) / 2;
         }
-    }
-
-    // Valida que el ultimo valor sea igual a pwmMax
-    if (cantElementosUserArray < tamanoTableTempSpeed - 1) {
-        if (tableTempSpeed[cantElementosUserArray].porcentajePWM != pwmMax) {
-            tableTempSpeed[cantElementosUserArray + 1].temperatura = tableTempSpeed[cantElementosUserArray].temperatura + 1;
-            tableTempSpeed[cantElementosUserArray + 1].porcentajePWM = pwmMax;
+        if (i < cantElementosUserArray && tableTempSpeed[i].porcentajePWM > tableTempSpeed[i + 1].porcentajePWM) { // Si el PWM es mayor al siguiente, se reemplaza el valor por un promedio entre el siguiente y el anterior.
+            tableTempSpeed[i].porcentajePWM = (tableTempSpeed[i + 1].porcentajePWM + tableTempSpeed[i - 1].porcentajePWM) / 2;
         }
     }
-
-    // Actualiza tamaño de la tabla
-    cantElementosArray = tamanoTableTempSpeed;
-
+    // Valida que el ultimo valor sea igual a pwmMax
+    if (tableTempSpeed[cantElementosUserArray].porcentajePWM != pwmMax) {
+        Serial.println("El ultimo valor de la tabla de conversion debe ser igual a 100%");
+        tableTempSpeed[cantElementosArray - 1].temperatura = tableTempSpeed[cantElementosUserArray].temperatura + 1;
+        tableTempSpeed[cantElementosArray - 1].porcentajePWM = pwmMax;
+    } else {
+        cantElementosArray--; // No necesitamos el último valor adicional si ya es igual a pwmMax
+    }
     // Imprime la tabla de conversion
     Serial.println("Tabla de conversion actualizada:");
     for (int i = 0; i < cantElementosArray; i++) {
