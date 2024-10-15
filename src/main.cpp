@@ -2,8 +2,8 @@
 
 // Pines de conexion
 static const unsigned int pinPWM = PIN_PWM;         // Pin de control de velocidad del motor.
-static const unsigned int pinTacometro = PIN_TACOMETRO; // Pin de lectura del tacometro.
 static const unsigned int pinTermistor = PIN_TERMISTOR; // Pin de lectura del termistor.
+//static const unsigned int pinTacometro = PIN_TACOMETRO; // Pin de lectura del tacometro.
 
 // Variables de control de velocidad
 static const int pwmMax = 100;     // Valor maximo de PWM
