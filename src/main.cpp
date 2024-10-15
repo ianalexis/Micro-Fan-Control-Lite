@@ -50,7 +50,7 @@ int calcularPWM(int temperatura);
 
 // Inicializa el sistema
 void setup() {
-     Serial.println("---------------------------------");
+    Serial.println("---------------------------------");
     Serial.println("Iniciando sistema...");
     Serial.begin(BAUD_RATE); // Inicia la comunicación serial.
     Serial.println("Configurando pines...");
