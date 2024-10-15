@@ -27,18 +27,9 @@ struct TempPWM {
     int porcentajePWM;
     };
 
-// Tabla de conversion de temperatura a PWM
-static const TempPWM tableDefaultTempSpeed[] = {
-    {0, 0},
-    {40, 25},
-    {60, 50},
-    {70, 70},
-    {80, 100}
-    };
-
 // Tabla del usuario
 static TempPWM tableUserTempSpeed[] = {
-    {40, 25},
+    {20, 25}, // TODO: Devolver temperatura a 40.
     {60, 50},
     {70, 70},
     {80, 100}
