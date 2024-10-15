@@ -9,7 +9,7 @@ static const unsigned int pinTermistor = PIN_TERMISTOR; // Pin de lectura del te
 static const int pwmMax = 100;     // Valor maximo de PWM
 static const int pwmBits = PWMBITS; // Resolucion de PWM en bits.
 static const int pwmOff = 0;     // Valor de PWM para apagar el motor.
-static const int pwmFreq = 20000;    // Frecuencia de PWM en Hz.
+static const int pwmFreq = 25;    // Frecuencia de PWM en Hz.
 static const int pwmMin = 25;        // Valor minimo de PWM.
 static int pwmActual = 0;         // Valor de PWM actual.
 
@@ -29,7 +29,7 @@ struct TempPWM {
 
 // Tabla del usuario
 static TempPWM tableUserTempSpeed[] = {
-    {20, 25}, // TODO: Devolver temperatura a 40.
+    {20, pwmMin}, // TODO: Devolver temperatura a 40.
     {60, 50},
     {70, 70},
     {80, 100}
