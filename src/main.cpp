@@ -29,7 +29,7 @@ struct TempPWM {
 
 // Tabla del usuario
 static TempPWM tableUserTempSpeed[] = {
-    {40, pwmMin}, // TODO: Devolver temperatura a 40.
+    {40, pwmMin},
     {60, 50},
     {70, 70},
     {80, 100}
