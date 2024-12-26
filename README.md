@@ -8,3 +8,7 @@ Este proyecto controla un ventilador utilizando señales PWM con una placa ESP32
 - Termistor 100K 3950
 - Ventilador controlado por PWM
 - PlatformIO (recomendado para compilar y flashear)
+
+## Esquema de Conexiones
+
+![Esquema de Conexiones](Esquema%20de%20conexiones.png)
